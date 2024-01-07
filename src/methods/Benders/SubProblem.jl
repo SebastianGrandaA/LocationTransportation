@@ -1,7 +1,7 @@
 """
-!!! TODO IMPORTANTE !!! Una vez que fijamos is_opened  einstalled_capacity, podemos descomponer por CLIENTE !!!!!
+    SubProblem
 
-Por cada cliente, decidimos la cantidad a distribuir desde cada ubicacion abierta.
+Given a first-stage solution, generates feasibility and optimality cuts for the master problem.
 """
 struct SubProblem <: ProblemType
     customer_idx::Int64
@@ -12,6 +12,11 @@ end
 
 is_feasible(::Feasibility, objective_value::Real)::Bool = isapprox(objective_value, 0)
 
+"""
+    SubProblem(::Optimality)
+
+Sencond-stage problem.
+"""
 function SubProblem(
     cut_type::Optimality,
     solver::SOLVER,
@@ -66,6 +71,9 @@ function SubProblem(
     return SubProblem(customer_idx, cut, subproblem, metrics)
 end
 
+"""
+    SubProblem(::Feasibility)
+"""
 function SubProblem(
     cut_type::Feasibility,
     solver::SOLVER,

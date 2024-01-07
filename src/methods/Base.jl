@@ -1,9 +1,7 @@
 """
-Location-transportation problem with single product.
-The decisions are to store a product at a warehouse location and to transport it to the customer location.
-Therefore, a first-stage decision is to determine wether to build a warehouse in a potential location and to determine the capacity of the warehouse.
+    solve(::Base)
 
-TODO this is P1. Probar implementar P2 (y comparar )
+Solve the LocationTransportation problem using the deterministic model using the given instance and solver.
 """
 function solve(method::Base, instance::Instance, solver::SOLVER)::Solution
     model = Model(solver)
@@ -11,9 +9,9 @@ function solve(method::Base, instance::Instance, solver::SOLVER)::Solution
     locations = 1:nb_locations(instance)
     customers = 1:nb_customers(instance)
 
-    @variable(model, is_opened[locations], Bin) # facility location (y_i)
-    @variable(model, installed_capacity[locations] >= 0) # warehouse capacity (z_i)
-    @variable(model, distribution_amount[locations, customers] >= 0) # transportation quantity (x_ij)
+    @variable(model, is_opened[locations], Bin) # facility location
+    @variable(model, installed_capacity[locations] >= 0) # warehouse capacity
+    @variable(model, distribution_amount[locations, customers] >= 0) # transportation quantity
 
     # Minimize total cost (fixed cost + capacity cost + transportation cost)
     @objective(
@@ -52,4 +50,3 @@ function solve(method::Base, instance::Instance, solver::SOLVER)::Solution
 
     return Solution(method, instance, model, execution_time)
 end
-

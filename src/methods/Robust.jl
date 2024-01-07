@@ -1,14 +1,8 @@
 """
-Robust Optimization (RO) is a methodology for optimization under uncertainty.
-Contrary to stochastic optimization, robust optimization does not rely on probability distributions.
-Instead, RO considers an uncertainty set for the unknown parameters, against which the taken decision should be immune.
-In that sense, constraints have to be respected in every possible realization of the parameters and the objective function evaluated in the worst-case scenario.
+    solve(::Robust)
 
-In other words, solutions must be feasible for all possible realizations of the uncertain parameters. This leads to over-conservative solutions.
-To trackle this issue, consider the Adjustable Robust Optimization (ARO) approach, which restricts the second-stage variables to affine functions of the uncertainty.
-
-Other alternative is to consider an approximate method. In the affine decision rule approach, the second-stage decisions are expressed as affine functions of the uncertainty.
-
+Solve the LocationTransportation problem using the robust model using the given instance and solver.
+The robust model is obtained by solving the uncertainty set problem.
 """
 function solve(method::Robust, instance::Instance, solver::SOLVER)::Solution
     model = Model(solver)
@@ -59,4 +53,3 @@ function solve(method::Robust, instance::Instance, solver::SOLVER)::Solution
 
     return Solution(method, instance, model, execution_time)
 end
-

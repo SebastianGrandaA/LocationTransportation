@@ -3,6 +3,7 @@ module LocationTransportation
 using JuMP
 using Gurobi
 using Distributed
+using DataFrames
 
 abstract type Method end
 struct Base <: Method end
@@ -35,7 +36,9 @@ include("methods/Benders/ConstraintGeneration.jl")
 include("methods/AffineDecision.jl")
 
 """
-Entry-point
+    optimize(model_name::Symbol, instance::Instance, solver::SOLVER)
+
+Dispatches to the corresponding optimization method.
 """
 function optimize(model_name::Symbol, instance::Instance, solver::SOLVER)::Union{Solution, Nothing}
     try
@@ -50,7 +53,11 @@ function optimize(model_name::Symbol, instance::Instance, solver::SOLVER)::Union
     return nothing
 end
 
+"""
+    execute(; kwargs...)::Union{Solution, Nothing}
 
+Entry-point for solving the instance with the given model and solver.
+"""
 function execute(; kwargs...)::Union{Solution, Nothing}
     # Set solver
     verbose = get(kwargs, :verbose, false) == true ? 1 : 0
@@ -68,15 +75,6 @@ function execute(; kwargs...)::Union{Solution, Nothing}
     model_name = kwargs[:model]
     solution = optimize(model_name, instance, solver)
     isnothing(solution) && return nothing
-    # show!(instance, solution)
-
-    # Export solution
-    # output_path = joinpath(pwd(), "outputs")
-    # export_solution(model_name, joinpath(output_path, "$(filename)_$(model_name)"), instance, solution)
-
-    # run_benchmark = get(kwargs, :benchmark, true)
-    # usage = get(kwargs, :usage, nothing)
-    # run_benchmark && add!(joinpath(output_path, "benchmark.csv"), instance, solution, usage)
 
     return solution
 end

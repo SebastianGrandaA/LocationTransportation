@@ -1,8 +1,8 @@
 """
-Derive exact solutions in the line of Benders’ decomposition method, i.e. they gradually construct the value function of the first-stage decisions using dual solutions of the second-stage decision problems
-Benders decomposition / L-shaped
+    solve(::ConstraintGeneration)
 
-The master problem generates candidate solutions and the subproblem generates cuts that are added to the master problem to either improve the lower bound (optimality cuts) or to make the master problem feasible (feasibility cuts).
+Iterative multi-cut dynamic constraint generation.
+Once this first-stage decisions are made, we solve the subproblem (SP) for each customer to determine the transportation quantities from the warehouses to the customers.
 """
 function solve(method::ConstraintGeneration, instance::Instance, solver::SOLVER)::Solution
     start_time, iteration = time(), 1
@@ -29,15 +29,14 @@ function solve(method::ConstraintGeneration, instance::Instance, solver::SOLVER)
     return Solution(method, instance, master, time() - start_time)
 end
 
-"""
-TODO agregar otros criterios o mencionar que para esta aplicacion por sipliicar solo este. (1 instancia y modelo pequeno)
-"""
 function should_continue(iteration::Int64)::Bool
     return iteration <= MAXIMUM_ITERATIONS
 end
 
 """
-Find new cuts for each scenario in parallel and register them in the master problem.
+    register_cuts!(::MasterProblem)
+
+Find new cuts for each customer in parallel and register them in the master problem.
 """
 function register_cuts!(master::MasterProblem, instance::Instance, solver::SOLVER, robust_demand::Vector{Float64})::Nothing
     optimality_type, feasibility_type = Optimality(), Feasibility()
@@ -76,9 +75,8 @@ function register_cuts!(master::MasterProblem, instance::Instance, solver::SOLVE
 end
 
 """
-Multi-cut approach
+    add_cuts!(::MasterProblem)
 
-TODO en reporte: mostrar los cuts en el notebook (en formula)
 Add registered cuts to the master problem.
 """
 function add_cuts!(master::MasterProblem, instance::Instance, iteration::Int64)

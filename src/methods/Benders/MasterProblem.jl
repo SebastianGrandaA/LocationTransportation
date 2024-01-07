@@ -1,9 +1,19 @@
+"""
+    Cut
+
+Iteratively-generated constraints added to the master problem.
+"""
 struct Cut
     type::CutType
     expression::AffExpr
     objective_value::Real
 end
 
+"""
+    MasterProblem
+
+First-stage problem.
+"""
 mutable struct MasterProblem <: ProblemType
     model::Model
     opened_locations::Vector{Int64}
@@ -13,21 +23,13 @@ mutable struct MasterProblem <: ProblemType
     history::Vector{Metrics}
 end
 
-"""
-First stage decisions:
-    is_opened
-    installed_capacity
-
-Second stage decisions:
-    distribution_amount
-"""
 function MasterProblem(instance::Instance, solver::SOLVER)
     master = Model(solver)
 
     locations = 1:nb_locations(instance)
 
-    @variable(master, is_opened[locations], Bin) # facility location (y_i)
-    @variable(master, installed_capacity[locations] >= 0) # warehouse capacity (z_i)
+    @variable(master, is_opened[locations], Bin) # facility location
+    @variable(master, installed_capacity[locations] >= 0) # warehouse capacity
     @variable(master, θ[locations] >= 0) # second-stage objective value
 
     # Minimize total cost (fixed cost + capacity cost + transportation cost)
@@ -72,11 +74,12 @@ function solve!(master::MasterProblem)::Nothing
     return nothing
 end
 
+"""
+    build_cut(::MasterProblem)
+
+Builds the expression of the cut to be added to the master problem.
+"""
 function build_cut(master::MasterProblem, objective_value::Real, duals, instance::Instance)::AffExpr
-    """
-    Builds the cuts for a given location
-    TODO: y si hacemos: dual for each constraint ; for i in sites : add dual[i] * model var
-    """
     expression = AffExpr(objective_value)
 
     for i in 1:nb_locations(instance)
@@ -86,6 +89,11 @@ function build_cut(master::MasterProblem, objective_value::Real, duals, instance
     return expression
 end
 
+"""
+    add_cut!(::Optimality)
+
+Add optimality cut to the master problem.
+"""
 function add_cut!(::Optimality, master::MasterProblem, expression::AffExpr, location_idx::Int64)::Nothing
     cut = @constraint(master.model, expression <= master.model[:θ][location_idx])
 
@@ -94,6 +102,11 @@ function add_cut!(::Optimality, master::MasterProblem, expression::AffExpr, loca
     return nothing
 end
 
+"""
+    add_cut!(::Feasibility)
+
+Add feasibility cut to the master problem.
+"""
 function add_cut!(::Feasibility, master::MasterProblem, expression::AffExpr, location_idx::Int64)::Nothing
     cut = @constraint(master.model, expression <= 0)
 

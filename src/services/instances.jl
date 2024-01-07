@@ -1,8 +1,8 @@
 struct Location
     ID::String
-    fixed_cost::Float64 # f_i
-    capacity_cost::Float64 # a_i
-    maximum_capacity::Float64 # C_i / K_i
+    fixed_cost::Float64
+    capacity_cost::Float64
+    maximum_capacity::Float64
 end
 
 struct UncertainDemand
@@ -12,19 +12,20 @@ end
 
 struct Customer
     ID::String
-    demand::Union{UncertainDemand, Real} # d_j
+    demand::Union{UncertainDemand, Real}
 end
 
 struct Instance
     locations::Vector{Location}
     customers::Vector{Customer}
-    transport_cost::Matrix{Float64} # c_ij
+    transport_cost::Matrix{Float64}
     params::Dict{Symbol, Any}
 end
 
 """
+    Instance(; kwargs...)
 
-Dummy instance
+Dummy instance taken from project description.
 """
 function Instance(; kwargs...)
     params = Dict{Symbol, Any}()
@@ -66,5 +67,4 @@ demand(value::Real)::Real = value
 demand_base(instance::Instance, j::Int64)::Float64 = demand(instance, j).base
 demand_deviation(instance::Instance, j::Int64)::Float64 = demand(instance, j).deviation
 transport_cost(instance::Instance, i::Int64, j::Int64)::Float64 = instance.transport_cost[i, j]
-
 is_feasible(instance::Instance)::Bool = total_capacity(instance) >= total_demand(instance)
