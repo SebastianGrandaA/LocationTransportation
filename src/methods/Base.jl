@@ -13,7 +13,7 @@ function solve(method::Base, instance::Instance, solver::SOLVER)::Solution
 
     @variable(model, is_opened[locations], Bin) # facility location (y_i)
     @variable(model, installed_capacity[locations] >= 0) # warehouse capacity (z_i)
-    @variable(model, distributed_ammount[locations, customers] >= 0) # transportation quantity (x_ij)
+    @variable(model, distribution_amount[locations, customers] >= 0) # transportation quantity (x_ij)
 
     # Minimize total cost (fixed cost + capacity cost + transportation cost)
     @objective(
@@ -22,7 +22,7 @@ function solve(method::Base, instance::Instance, solver::SOLVER)::Solution
         sum(
             fixed_cost(instance, i) * is_opened[i]
             + capacity_cost(instance, i) * installed_capacity[i]
-            + sum(transport_cost(instance, i, j) * distributed_ammount[i, j] for j in customers)
+            + sum(transport_cost(instance, i, j) * distribution_amount[i, j] for j in customers)
             for i in locations
         )
     )
@@ -38,14 +38,14 @@ function solve(method::Base, instance::Instance, solver::SOLVER)::Solution
     @constraint(
         model,
         transport_opened_locations[i in locations],
-        sum(distributed_ammount[i, j] for j in customers) <= installed_capacity[i]
+        sum(distribution_amount[i, j] for j in customers) <= installed_capacity[i]
     )
 
     # Demand satisfaction constraint
     @constraint(
         model,
         demand_satisfaction[j in customers],
-        sum(distributed_ammount[i, j] for i in locations) >= demand(instance, j)
+        sum(distribution_amount[i, j] for i in locations) >= demand(instance, j)
     )
 
     execution_time = @elapsed solve!(model)

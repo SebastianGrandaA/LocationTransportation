@@ -1,4 +1,5 @@
 struct Location
+    ID::String
     fixed_cost::Float64 # f_i
     capacity_cost::Float64 # a_i
     maximum_capacity::Float64 # C_i / K_i
@@ -10,6 +11,7 @@ struct UncertainDemand
 end
 
 struct Customer
+    ID::String
     demand::Union{UncertainDemand, Real} # d_j
 end
 
@@ -26,18 +28,26 @@ Dummy instance
 """
 function Instance(; kwargs...)
     params = Dict{Symbol, Any}()
-    locations = [Location(400, 18, 800), Location(414, 25, 800), Location(326, 20, 800)]
+    locations = [
+        Location("$(LOCATION_PREFFIX)-1", 400, 18, 800),
+        Location("$(LOCATION_PREFFIX)-2", 414, 25, 800),
+        Location("$(LOCATION_PREFFIX)-3", 326, 20, 800),
+    ]
     transport_cost = [22 33 24; 33 23 30; 20 25 27]
 
-    if haskey(kwargs, :uncertain_demand)
+    if haskey(kwargs, :uncertain_demand) && kwargs[:uncertain_demand] == true
         customers = [
-            Customer(UncertainDemand(206, 40)),
-            Customer(UncertainDemand(274, 40)),
-            Customer(UncertainDemand(220, 40)),
+            Customer("$(CUSTOMER_PREFFIX)-1", UncertainDemand(206, 40)),
+            Customer("$(CUSTOMER_PREFFIX)-2", UncertainDemand(274, 40)),
+            Customer("$(CUSTOMER_PREFFIX)-3", UncertainDemand(220, 40)),
         ]
         push!(params, :Γ => [1.8, 1.2])
     else
-        customers = [Customer(206), Customer(274), Customer(220)]
+        customers = [
+            Customer("$(CUSTOMER_PREFFIX)-1", 206),
+            Customer("$(CUSTOMER_PREFFIX)-2", 274),
+            Customer("$(CUSTOMER_PREFFIX)-3", 220)
+        ]
     end
 
     return Instance(locations, customers, transport_cost, params)

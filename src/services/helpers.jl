@@ -4,9 +4,13 @@ function solve!(model::Model)::Nothing
 end
 
 function validate(model::Model)::Nothing
-    to_optimality = termination_status(model) == MOI.OPTIMAL
+    is_optimal = termination_status(model) == MOI.OPTIMAL
+    !(is_optimal) && @warn "Model not optimal"
 
-    !(to_optimality) && @warn "Model not optimal"
+    is_unfeasible = termination_status(model) == MOI.INFEASIBLE_OR_UNBOUNDED
+    is_unfeasible && error("Model is unfeasible")
 
     return nothing
 end
+
+str(method::Method)::String = last(split(string(typeof(method)), "."))

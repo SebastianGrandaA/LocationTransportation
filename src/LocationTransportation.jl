@@ -2,6 +2,7 @@ module LocationTransportation
 
 using JuMP
 using Gurobi
+using Distributed
 
 abstract type Method end
 struct Base <: Method end
@@ -9,17 +10,29 @@ struct Robust <: Method end
 struct ConstraintGeneration <: Method end
 struct AffineDecision <: Method end
 
+abstract type CutType end
+struct Feasibility <: CutType end
+struct Optimality <: CutType end
+
+abstract type ProblemType end
+
 const SOLVER = MOI.OptimizerWithAttributes
+const LOCATION_PREFFIX = "L"
+const CUSTOMER_PREFFIX = "C"
+const SUBPROBLEM_CONSTRAINTS = 2
+const MAXIMUM_ITERATIONS = 5
 
 include("services/instances.jl")
 include("services/solutions.jl")
 include("services/helpers.jl")
 
 include("methods/Base.jl")
+include("methods/UncertaintySet.jl")
 include("methods/Robust.jl")
-include("methods/ConstraintGeneration.jl")
+include("methods/Benders/MasterProblem.jl")
+include("methods/Benders/SubProblem.jl")
+include("methods/Benders/ConstraintGeneration.jl")
 include("methods/AffineDecision.jl")
-
 
 """
 Entry-point

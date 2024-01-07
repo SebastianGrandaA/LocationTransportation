@@ -1,6 +1,7 @@
 @kwdef mutable struct Metrics
     objective_value::Real = NaN
     execution_time::Real = NaN
+    expected_recourse::Real = 0
 end
 
 function str(metrics::Metrics)::String
@@ -18,16 +19,16 @@ struct Warehouse
 end
 
 struct Distribution
-    warehouse::Warehouse # TODO poner solo los IDS?
-    customer::Customer # TODO poner solo los IDS?
-    distributed_ammount::Float64
+    warehouse::Warehouse
+    customer::Customer
+    distribution_amount::Float64
 end
 
 struct Solution
     method::Method
     warehouses::Vector{Warehouse}
     distributions::Vector{Distribution}
-    model::Model
+    model::Union{Model, Nothing}
     metrics::Metrics
 end
 
@@ -38,10 +39,10 @@ function Solution(method::Method, instance::Instance, model::Model, execution_ti
         if value(model[:is_opened][i]) > 0.5
     ]
     distributions = [
-        Distribution(warehouse, customer, value(model[:distributed_ammount][i, j]))
+        Distribution(warehouse, customer, value(model[:distribution_amount][i, j]))
         for (i, warehouse) in enumerate(warehouses)
         for (j, customer) in enumerate(instance.customers)
-        if value(model[:distributed_ammount][i, j]) > 0
+        if value(model[:distribution_amount][i, j]) > 0
     ]
     metrics = Metrics(objective_value = objective_value(model), execution_time = execution_time)
 
